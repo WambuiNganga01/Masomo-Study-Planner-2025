@@ -31,34 +31,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <title>Login - Study Planner</title>
     <link rel="stylesheet" href="css/style.css">
-</head>
+    </head>
 <body>
     <div class="container">
-        <h2>Login</h2>
-        <?php 
-        if (isset($error)) echo "<p class='error'>$error</p>";
-        if (isset($_SESSION['success'])) {
-            echo "<p class='success'>{$_SESSION['success']}</p>";
-            unset($_SESSION['success']);
-        }
-        ?>
-        
-        <form method="POST" action="">
-            <div class="form-group">
-                <label>Email:</label>
-                <input type="email" name="email" required>
+        <div class="form-container">
+            <div class="form-header">
+                <h2>Login</h2>
             </div>
             
-            <div class="form-group">
-                <label>Password:</label>
-                <input type="password" name="password" required>
-            </div>
+            <?php if (isset($error)): ?>
+                <div class="alert alert-danger">
+                    <?php echo $error; ?>
+                </div>
+            <?php endif; ?>
             
-            <button type="submit">Login</button>
-        </form>
-        
-        <p>Don't have an account? <a href="register.php">Register here</a></p>
+            <?php if (isset($_SESSION['success'])): ?>
+                <div class="alert alert-success">
+                    <?php echo $_SESSION['success']; ?>
+                </div>
+                <?php unset($_SESSION['success']); ?>
+            <?php endif; ?>
+            
+            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            
+            <div class="form-footer">
+                <p>Don't have an account? <a href="register.php">Register here</a></p>
+            </div>
+        </div>
     </div>
 </body>
 </html>
-
