@@ -1,0 +1,2158 @@
+I want to build a study planner and I need help building the whole system, I have build some 
+parts, I need your help completing the other parts as per my flow below. I have also attached 
+files of my progress for you build on top. So continue from activities.php and finish it also 
+its not yet complete
+
+FLOW:
+I want to build student study planner, using html css javascript php and mysql. 
+So here is my vision I want user auth(register, login, logout simple editable profile 
+page(image, name, school, course)), next thing is user will be able to add a subject 
+after adding subject, inside subject they will add weeks(study plan) and inside the week 
+they will add start date and end date, a check box for notes to be read and assignments 
+to be done, then after creating the week activities and what exists for that week as some 
+weeks will not have assignments, they will have a button "done "(next to notes to be read 
+that they added for that week when they were creating the week plan for that a subject) to 
+click when they are done reading next to notes read. Same for assignments, then we will 
+have a notifications page that shows not yet done weekly activities for a specific subject. 
+A subject will not be removed from notifications page if both notes and assignments are 
+not complete or  also cannot be removed if that subject had notes only for that week same 
+to assignments. Basically, if a week has notes to be read, it will be removed once it is 
+checked as done, if  user had assignments only that subject will be removed once assignments 
+is checked as done.
+
+So build this for me, I'm new to PHP and MySQL to while building teach me. If possible 
+build the whole project in one response. I have xampp setup.
+
+i.The system will allow students to sign in and out.
+ii. The system should allow students to create weekly study plans including notes to be 
+read and assignments’ deadlines.
+iii.The system should provide students with a dashboard displaying their learning 
+analytics, including study time, progress, strengths, and areas for improvement.
+iv.To encourage student engagement and motivation by introducing gamification elements, 
+such as achievements and rewards. The system should allow students to access their progress and receive reports
+
+
+
+
+FILES:
+
+Database\study_planner.sql:
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+-- structure for table `achievements`
+CREATE TABLE `achievements` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `achievement_type` varchar(50) NOT NULL,
+  `description` text NOT NULL,
+  `earned_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+-- structure for table `study_activities`
+CREATE TABLE `study_activities` (
+  `id` int(11) NOT NULL,
+  `week_id` int(11) DEFAULT NULL,
+  `activity_type` enum('notes','assignment') NOT NULL,
+  `description` text NOT NULL,
+  `is_completed` tinyint(1) DEFAULT 0,
+  `completed_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+-- structure for table `study_weeks`
+CREATE TABLE `study_weeks` (
+  `id` int(11) NOT NULL,
+  `subject_id` int(11) DEFAULT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+-- structure for table `subjects`
+CREATE TABLE `subjects` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `subject_name` varchar(100) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+-- structure for table `users`
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `profile_image` varchar(255) DEFAULT NULL,
+  `school` varchar(100) DEFAULT NULL,
+  `course` varchar(100) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `points` int(11) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+-- Dumping data for table `users`
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `profile_image`, `school`, `course`, `created_at`, `points`) VALUES
+(1, 'Mercy', 'mnganga313@gmail.com', '$2y$10$0nervrcqFC1ABMX2iXVbzuELJHQB/uxOr7AVQhRFINdamWn6Ibn4e', NULL, NULL, NULL, '2025-03-13 22:01:27', 0);
+
+-- Indexes for table `achievements`
+ALTER TABLE `achievements`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+
+-- Indexes for table `study_activities`
+ALTER TABLE `study_activities`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `week_id` (`week_id`);
+
+
+-- Indexes for table `study_weeks`
+ALTER TABLE `study_weeks`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `subject_id` (`subject_id`);
+
+
+-- Indexes for table `subjects`
+ALTER TABLE `subjects`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+
+-- Indexes for table `users`
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`),
+  ADD UNIQUE KEY `email` (`email`);
+
+
+-- AUTO_INCREMENT for dumped tables
+-- AUTO INCREMENT for table `achievements`
+ALTER TABLE `achievements`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+
+-- AUTO_INCREMENT for table `study_activities`
+ALTER TABLE `study_activities`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+
+-- AUTO_INCREMENT for table `study_weeks`
+ALTER TABLE `study_weeks`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+
+-- AUTO_INCREMENT for table `subjects`
+ALTER TABLE `subjects`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+
+-- AUTO_INCREMENT for table `users`
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+
+-- Constraints for dumped tables that are connected with foreign key relationship 
+-- Constraints for table `achievements` 
+ALTER TABLE `achievements`
+  ADD CONSTRAINT `achievements_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+
+-- Constraints for table `study_activities`
+ALTER TABLE `study_activities`
+  ADD CONSTRAINT `study_activities_ibfk_1` FOREIGN KEY (`week_id`) REFERENCES `study_weeks` (`id`) ON DELETE CASCADE;
+
+
+-- Constraints for table `study_weeks`
+ALTER TABLE `study_weeks`
+  ADD CONSTRAINT `study_weeks_ibfk_1` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE;
+
+
+-- Constraints for table `subjects`
+ALTER TABLE `subjects`
+  ADD CONSTRAINT `subjects_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+
+
+
+
+
+
+
+css\style.css:
+/* dashboard.css */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.welcome-section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+}
+
+.profile-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-right: 20px;
+}
+
+.stats-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.upcoming-activities {
+    margin-bottom: 30px;
+}
+
+.activity-card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.activity-type {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: #e9ecef;
+    font-size: 12px;
+}
+
+.due-date {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.subject-progress {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.recent-achievements {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.achievement-card {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.achievement-icon {
+    font-size: 24px;
+    margin-right: 15px;
+}
+
+.achievement-info {
+    flex: 1;
+}
+
+.achievement-info h4 {
+    margin: 0 0 5px 0;
+}
+
+.achievement-info small {
+    color: #6c757d;
+}
+
+/* login-register.css - to be added to your existing dashboard.css */
+
+/* Form containers */
+.form-container {
+    max-width: 500px;
+    margin: 50px auto;
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-header h2 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+/* Alert messages */
+.alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+/* Form elements */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #495057;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Submit button */
+.btn {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    user-select: none;
+    border: 1px solid transparent;
+    padding: 12px 15px;
+    font-size: 16px;
+    line-height: 1.5;
+    border-radius: 4px;
+    transition: all 0.15s ease-in-out;
+    cursor: pointer;
+    width: 100%;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+/* Form footer - for the links */
+.form-footer {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #dee2e6;
+}
+
+.form-footer a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.form-footer a:hover {
+    text-decoration: underline;
+}
+
+
+
+
+
+
+
+
+includes\navigation.php:
+<?php
+// File: includes/navigation.php
+$current_page = basename($_SERVER['PHP_SELF']);
+?>
+
+<nav class="main-nav">
+    <div class="nav-brand">
+        <a href="dashboard.php">Masomo Study Planner</a>
+    </div>
+    
+    <ul class="nav-links">
+        <li class="<?php echo $current_page == 'dashboard.php' ? 'active' : ''; ?>">
+            <a href="dashboard.php">Dashboard</a>
+        </li>
+        
+        <li class="<?php echo $current_page == 'subjects.php' ? 'active' : ''; ?>">
+            <a href="subjects.php">Subjects</a>
+        </li>
+        
+        <li class="<?php echo $current_page == 'achievements.php' ? 'active' : ''; ?>">
+            <a href="achievements.php">Achievements</a>
+        </li>
+        
+        <li class="profile-menu">
+            <a href="profile.php">Profile</a>
+            <a href="logout.php">Logout</a>
+        </li>
+    </ul>
+</nav>
+
+<style>
+.main-nav {
+    background-color: #ffffff;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand a {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.nav-links li a {
+    color: #333;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.nav-links li.active a {
+    background-color: #007bff;
+    color: white;
+}
+
+.nav-links li a:hover {
+    background-color: #f8f9fa;
+    color: #007bff;
+}
+
+.nav-links li.active a:hover {
+    background-color: #0056b3;
+    color: white;
+}
+
+.profile-menu {
+    display: flex;
+    gap: 1rem;
+}
+
+.profile-menu a:last-child {
+    color: #dc3545;
+}
+
+@media (max-width: 768px) {
+    .main-nav {
+        flex-direction: column;
+        padding: 1rem;
+    }
+    
+    .nav-links {
+        flex-direction: column;
+        width: 100%;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .nav-links li {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .profile-menu {
+        flex-direction: column;
+        width: 100%;
+    }
+}
+</style>
+
+
+
+
+
+
+
+
+C:\xampp\htdocs\Masomo-Study-Planner-2025\config.php:
+<?php
+// config.php
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_NAME', 'study_planner');
+
+// Create database connection
+function connectDB() {
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+    
+    return $conn;
+}
+
+// Start session on all pages
+session_start();
+
+// Check if user is logged in
+function isLoggedIn() {
+    return isset($_SESSION['user_id']);
+}
+
+// Redirect if not logged in
+function requireLogin() {
+    if (!isLoggedIn()) {
+        header("Location: login.php");
+        exit();
+    }
+}
+?>
+
+
+
+
+
+
+
+
+dashboard.php:
+<?php
+// dashboard.php
+require_once 'config.php';
+requireLogin();
+
+class Dashboard {
+    private $conn;
+    private $user_id;
+    
+    public function __construct($conn, $user_id) {
+        $this->conn = $conn;
+        $this->user_id = $user_id;
+    }
+    
+    // Get user's profile information
+    public function getUserProfile() {
+        $stmt = $this->conn->prepare("
+            SELECT username, email, profile_image, school, course, points 
+            FROM users 
+            WHERE id = ?
+        ");
+        $stmt->bind_param("i", $this->user_id);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc();
+    }
+    
+    // Get upcoming activities (due within next 7 days)
+    public function getUpcomingActivities() {
+        $stmt = $this->conn->prepare("
+            SELECT s.subject_name, w.start_date, w.end_date, 
+                   a.description, a.activity_type, a.is_completed
+            FROM study_activities a
+            JOIN study_weeks w ON a.week_id = w.id
+            JOIN subjects s ON w.subject_id = s.id
+            WHERE s.user_id = ? 
+            AND w.end_date >= CURDATE() 
+            AND w.end_date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+            AND a.is_completed = 0
+            ORDER BY w.end_date ASC
+        ");
+        $stmt->bind_param("i", $this->user_id);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+    
+    // Get completion statistics
+    public function getCompletionStats() {
+        $stmt = $this->conn->prepare("
+            SELECT 
+                COUNT(CASE WHEN a.is_completed = 1 THEN 1 END) as completed_activities,
+                COUNT(*) as total_activities,
+                COUNT(DISTINCT s.id) as total_subjects,
+                COUNT(DISTINCT w.id) as total_weeks
+            FROM subjects s
+            LEFT JOIN study_weeks w ON s.id = w.subject_id
+            LEFT JOIN study_activities a ON w.id = a.week_id
+            WHERE s.user_id = ?
+        ");
+        $stmt->bind_param("i", $this->user_id);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc();
+    }
+    
+    // Get recent achievements
+    public function getRecentAchievements() {
+        $stmt = $this->conn->prepare("
+            SELECT achievement_type, description, earned_at
+            FROM achievements
+            WHERE user_id = ?
+            ORDER BY earned_at DESC
+            LIMIT 5
+        ");
+        $stmt->bind_param("i", $this->user_id);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+    
+    // Get subject-wise progress
+    public function getSubjectProgress() {
+        $stmt = $this->conn->prepare("
+            SELECT 
+                s.subject_name,
+                COUNT(CASE WHEN a.is_completed = 1 THEN 1 END) as completed_activities,
+                COUNT(a.id) as total_activities
+            FROM subjects s
+            LEFT JOIN study_weeks w ON s.id = w.subject_id
+            LEFT JOIN study_activities a ON w.id = a.week_id
+            WHERE s.user_id = ?
+            GROUP BY s.id
+        ");
+        $stmt->bind_param("i", $this->user_id);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+}
+
+// Initialize dashboard
+$conn = connectDB();
+$dashboard = new Dashboard($conn, $_SESSION['user_id']);
+
+// Get all dashboard data
+$userProfile = $dashboard->getUserProfile();
+$upcomingActivities = $dashboard->getUpcomingActivities();
+$completionStats = $dashboard->getCompletionStats();
+$recentAchievements = $dashboard->getRecentAchievements();
+$subjectProgress = $dashboard->getSubjectProgress();
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard - Study Planner</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <?php include 'includes/navigation.php'; ?>
+        
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="profile-info">
+                <?php if ($userProfile['profile_image']): ?>
+                    <img src="<?php echo htmlspecialchars($userProfile['profile_image']); ?>" alt="Profile" class="profile-image">
+                <?php endif; ?>
+                <h2>Welcome, <?php echo htmlspecialchars($userProfile['username']); ?>!</h2>
+                <p>School: <?php echo htmlspecialchars($userProfile['school']); ?></p>
+                <p>Course: <?php echo htmlspecialchars($userProfile['course']); ?></p>
+                <p>Points: <?php echo $userProfile['points']; ?></p>
+            </div>
+        </div>
+        
+        <!-- Statistics Overview -->
+        <div class="stats-overview">
+            <div class="stat-card">
+                <h3>Completion Rate</h3>
+                <p class="stat-number">
+                    <?php 
+                    $completion_rate = $completionStats['total_activities'] > 0 
+                        ? round(($completionStats['completed_activities'] / $completionStats['total_activities']) * 100)
+                        : 0;
+                    echo $completion_rate . '%';
+                    ?>
+                </p>
+            </div>
+            
+            <div class="stat-card">
+                <h3>Total Subjects</h3>
+                <p class="stat-number"><?php echo $completionStats['total_subjects']; ?></p>
+            </div>
+            
+            <div class="stat-card">
+                <h3>Study Weeks</h3>
+                <p class="stat-number"><?php echo $completionStats['total_weeks']; ?></p>
+            </div>
+        </div>
+        
+        <!-- Upcoming Activities -->
+        <div class="upcoming-activities">
+            <h3>Upcoming Activities</h3>
+            <?php if (empty($upcomingActivities)): ?>
+                <p>No upcoming activities for the next 7 days.</p>
+            <?php else: ?>
+                <?php foreach ($upcomingActivities as $activity): ?>
+                    <div class="activity-card">
+                        <h4><?php echo htmlspecialchars($activity['subject_name']); ?></h4>
+                        <p><?php echo htmlspecialchars($activity['description']); ?></p>
+                        <p class="due-date">Due: <?php echo date('M d, Y', strtotime($activity['end_date'])); ?></p>
+                        <span class="activity-type"><?php echo ucfirst($activity['activity_type']); ?></span>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+        
+        <!-- Subject Progress -->
+        <div class="subject-progress">
+            <h3>Subject Progress</h3>
+            <canvas id="subjectProgressChart"></canvas>
+        </div>
+        
+        <!-- Recent Achievements -->
+        <div class="recent-achievements">
+            <h3>Recent Achievements</h3>
+            <?php if (empty($recentAchievements)): ?>
+                <p>No achievements yet. Keep studying to earn achievements!</p>
+            <?php else: ?>
+                <?php foreach ($recentAchievements as $achievement): ?>
+                    <div class="achievement-card">
+                        <div class="achievement-icon">🏆</div>
+                        <div class="achievement-info">
+                            <h4><?php echo htmlspecialchars($achievement['achievement_type']); ?></h4>
+                            <p><?php echo htmlspecialchars($achievement['description']); ?></p>
+                            <small>Earned on: <?php echo date('M d, Y', strtotime($achievement['earned_at'])); ?></small>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </div>
+    
+    <script>
+    // Create subject progress chart
+    const ctx = document.getElementById('subjectProgressChart').getContext('2d');
+    const subjectData = <?php echo json_encode($subjectProgress); ?>;
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: subjectData.map(subject => subject.subject_name),
+            datasets: [{
+                label: 'Completion Rate (%)',
+                data: subjectData.map(subject => 
+                    subject.total_activities > 0 
+                        ? (subject.completed_activities / subject.total_activities) * 100 
+                        : 0
+                ),
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+index.php:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Planner - Track Your Academic Progress</title>
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Navbar Styles */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px 30px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: #3a506b;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            background-color: #eef1f6;
+        }
+        
+        .nav-links a.cta {
+            background-color:#007bff;
+            color: white;
+        }
+        
+        .nav-links a.cta:hover {
+            background-color: #0069d9;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3a506b;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo img {
+            height: 40px;
+            margin-right: 10px;
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 150px 0 100px;
+            text-align: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e7ec 100%);
+        }
+        
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            color: #2b2d42;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: #555;
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color:#007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background-color: #0069d9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid#007bff;
+            color:#007bff;
+        }
+        
+        .btn-outline:hover {
+            background-color:#007bff;
+            color: white;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 80px 0;
+            background-color: white;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .section-title h2 {
+            font-size: 2.2rem;
+            color: #2b2d42;
+            margin-bottom: 15px;
+        }
+        
+        .section-title p {
+            color: #555;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color:#007bff;
+            margin-bottom: 20px;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #2b2d42;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #2b2d42;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .copyright {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* For smaller screens */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 15px;
+            }
+            
+            .nav-links {
+                margin-top: 15px;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-links">
+            <a href="index.php" class="logo">
+                Masomo Study Planner
+            </a>
+            <a href="login.php">Login</a>
+            <a href="register.php" class="cta">Register</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Maximize Your Study Efficiency</h1>
+            <p>Track your subjects, organize study weeks, and earn achievements as you complete your academic goals.</p>
+            <div class="hero-buttons">
+                <a href="register.php" class="btn">Get Started</a>
+                <a href="login.php" class="btn btn-outline">Login</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>Why Choose Masomo Study Planner?</h2>
+                <p>Our platform helps you stay organized and motivated throughout your academic journey.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📚</div>
+                    <h3>Subject Management</h3>
+                    <p>Create and organize all your subjects in one place for easy access and tracking.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📅</div>
+                    <h3>Weekly Planning</h3>
+                    <p>Break down your study schedule into manageable weekly chunks with start and end dates.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>Activity Tracking</h3>
+                    <p>Record your notes and assignments, mark them as complete, and never miss a deadline.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏆</div>
+                    <h3>Achievements</h3>
+                    <p>Earn points and unlock achievements as you progress through your studies.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <a href="index.php" class="logo" style="color: white;">
+                    Masomo Study Planner
+                </a>
+                <p class="copyright">&copy; 2025 Masomo Study Planner. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+login.php:
+<?php
+// login.php
+require_once 'config.php';
+
+// Check if the request method is POST (form submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Get the email and password from the form submission
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    
+    // Connect to the database
+    $conn = connectDB();
+    $stmt = $conn->prepare("SELECT id, password FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($row = $result->fetch_assoc()) {
+        if (password_verify($password, $row['password'])) {
+            $_SESSION['user_id'] = $row['id'];
+            header("Location: dashboard.php");
+            exit();
+        }
+    }
+    
+    // Set an error message if login credentials are incorrect
+    $error = "Invalid email or password";
+
+    // Close the database connection
+    $stmt->close();
+    $conn->close();
+}
+?>
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - Study Planner</title>
+    <link rel="stylesheet" href="css/style.css">
+    </head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <div class="form-header">
+                <h2>Login</h2>
+            </div>
+            
+            <?php if (isset($error)): ?>
+                <div class="alert alert-danger">
+                    <?php echo $error; ?>
+                </div>
+            <?php endif; ?>
+            
+            <?php if (isset($_SESSION['success'])): ?>
+                <div class="alert alert-success">
+                    <?php echo $_SESSION['success']; ?>
+                </div>
+                <?php unset($_SESSION['success']); ?>
+            <?php endif; ?>
+            
+            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            
+            <div class="form-footer">
+                <p>Don't have an account? <a href="register.php">Register here</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
+
+
+
+logout.php:
+<?php
+// logout.php
+require_once 'config.php';
+session_destroy();
+
+// Redirect to the login page
+header("Location: login.php");
+
+// Exit script
+exit();
+?>
+
+
+
+
+
+
+register.php:
+<?php
+// register.php
+require_once 'config.php';
+
+// Check if the request method is POST (form submission)
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = $_POST['username'];
+    $email = $_POST['email'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    
+    $conn = connectDB();
+    $stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $username, $email, $password);
+
+    if ($stmt->execute()) {
+        $_SESSION['success'] = "Registration successful! Please login.";
+        header("Location: login.php");
+        exit();
+    } else {
+        $error = "Registration failed. Please try again.";
+    }
+    $stmt->close();
+    $conn->close();
+}
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register - Study Planner</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <div class="form-header">
+                <h2>Register</h2>
+            </div>
+            
+            <?php if (isset($error)): ?>
+                <div class="alert alert-danger">
+                    <?php echo $error; ?>
+                </div>
+            <?php endif; ?>
+            
+            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" class="form-control" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Register</button>
+            </form>
+            
+            <div class="form-footer">
+                <p>Already have an account? <a href="login.php">Login here</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
+
+profile.php:
+<?php
+// profile.php
+require_once 'config.php';
+requireLogin();
+
+$conn = connectDB();
+$user_id = $_SESSION['user_id'];
+$message = '';
+$error = '';
+
+// Fetch current user data
+function getUserData($conn, $user_id) {
+    $stmt = $conn->prepare("SELECT username, email, profile_image, school, course FROM users WHERE id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    return $stmt->get_result()->fetch_assoc();
+}
+
+$userData = getUserData($conn, $user_id);
+
+// Handle profile update
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Get form data
+    $username = $_POST['username'];
+    $email = $_POST['email'];
+    $school = $_POST['school'];
+    $course = $_POST['course'];
+    
+    // Check if a new profile image was uploaded
+    $profile_image = $userData['profile_image']; // Default to current image
+    
+    if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] == 0) {
+        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+        $filename = $_FILES['profile_image']['name'];
+        $filetype = pathinfo($filename, PATHINFO_EXTENSION);
+        
+        // Verify file extension
+        if (in_array(strtolower($filetype), $allowed)) {
+            // Create unique file name
+            $newFilename = "profile_" . $user_id . "_" . time() . "." . $filetype;
+            $uploadPath = "uploads/" . $newFilename;
+            
+            // Create uploads directory if it doesn't exist
+            if (!file_exists('uploads')) {
+                mkdir('uploads', 0777, true);
+            }
+            
+            // Upload file
+            if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $uploadPath)) {
+                $profile_image = $uploadPath;
+            } else {
+                $error = "Failed to upload image.";
+            }
+        } else {
+            $error = "Invalid file type. Please upload JPG, PNG, or GIF.";
+        }
+    }
+    
+    // Update profile in database if no errors
+    if (empty($error)) {
+        $stmt = $conn->prepare("UPDATE users SET username = ?, email = ?, profile_image = ?, school = ?, course = ? WHERE id = ?");
+        $stmt->bind_param("sssssi", $username, $email, $profile_image, $school, $course, $user_id);
+        
+        if ($stmt->execute()) {
+            $message = "Profile updated successfully!";
+            $userData = getUserData($conn, $user_id); // Refresh user data
+        } else {
+            $error = "Error updating profile: " . $conn->error;
+        }
+        $stmt->close();
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Profile - Study Planner</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <?php include 'includes/navigation.php'; ?>
+        
+        <div class="form-container" style="max-width: 600px;">
+            <div class="form-header">
+                <h2>Edit Profile</h2>
+                <p>Update your personal information</p>
+            </div>
+            
+            <?php if (!empty($message)): ?>
+                <div class="alert alert-success">
+                    <?php echo $message; ?>
+                </div>
+            <?php endif; ?>
+            
+            <?php if (!empty($error)): ?>
+                <div class="alert alert-danger">
+                    <?php echo $error; ?>
+                </div>
+            <?php endif; ?>
+            
+            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" enctype="multipart/form-data">
+                <div class="profile-image-container" style="text-align: center; margin-bottom: 20px;">
+                    <?php if (!empty($userData['profile_image'])): ?>
+                        <img src="<?php echo htmlspecialchars($userData['profile_image']); ?>" alt="Profile" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover;">
+                    <?php else: ?>
+                        <div style="width: 150px; height: 150px; border-radius: 50%; background-color: #e9ecef; display: inline-flex; align-items: center; justify-content: center; font-size: 40px; color: #adb5bd;">
+                            <?php echo strtoupper(substr($userData['username'], 0, 1)); ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                
+                <div class="form-group">
+                    <label for="profile_image">Profile Picture:</label>
+                    <input type="file" class="form-control" id="profile_image" name="profile_image">
+                </div>
+                
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" class="form-control" id="username" name="username" value="<?php echo htmlspecialchars($userData['username']); ?>" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($userData['email']); ?>" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="school">School/University:</label>
+                    <input type="text" class="form-control" id="school" name="school" value="<?php echo htmlspecialchars($userData['school'] ?? ''); ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="course">Course/Program:</label>
+                    <input type="text" class="form-control" id="course" name="course" value="<?php echo htmlspecialchars($userData['course'] ?? ''); ?>">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+subjects.php:
+<?php
+// subjects.php
+require_once 'config.php';
+requireLogin();
+
+$conn = connectDB();
+$user_id = $_SESSION['user_id'];
+$message = '';
+$error = '';
+
+// Handle adding a new subject
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'add_subject') {
+    $subject_name = trim($_POST['subject_name']);
+    
+    if (!empty($subject_name)) {
+        $stmt = $conn->prepare("INSERT INTO subjects (user_id, subject_name) VALUES (?, ?)");
+        $stmt->bind_param("is", $user_id, $subject_name);
+        
+        if ($stmt->execute()) {
+            $message = "Subject added successfully!";
+        } else {
+            $error = "Error adding subject: " . $conn->error;
+        }
+        $stmt->close();
+    } else {
+        $error = "Subject name cannot be empty.";
+    }
+}
+
+// Handle deleting a subject
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'delete_subject') {
+    $subject_id = $_POST['subject_id'];
+    
+    $stmt = $conn->prepare("DELETE FROM subjects WHERE id = ? AND user_id = ?");
+    $stmt->bind_param("ii", $subject_id, $user_id);
+    
+    if ($stmt->execute()) {
+        $message = "Subject deleted successfully!";
+    } else {
+        $error = "Error deleting subject: " . $conn->error;
+    }
+    $stmt->close();
+}
+
+// Get all subjects for the user
+$stmt = $conn->prepare("
+    SELECT s.*, 
+           COUNT(DISTINCT w.id) as week_count,
+           SUM(CASE WHEN a.is_completed = 1 THEN 1 ELSE 0 END) as completed_activities,
+           COUNT(a.id) as total_activities
+    FROM subjects s
+    LEFT JOIN study_weeks w ON s.id = w.subject_id
+    LEFT JOIN study_activities a ON w.id = a.week_id
+    WHERE s.user_id = ?
+    GROUP BY s.id
+    ORDER BY s.created_at DESC
+");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$subjects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Subjects - Study Planner</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .subject-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .subject-info {
+            flex: 1;
+        }
+        
+        .subject-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+        
+        .progress-container {
+            margin-top: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            height: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #007bff;
+        }
+        
+        .add-subject-form {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <?php include 'includes/navigation.php'; ?>
+        
+        <h1>Your Subjects</h1>
+        
+        <?php if (!empty($message)): ?>
+            <div class="alert alert-success">
+                <?php echo $message; ?>
+            </div>
+        <?php endif; ?>
+        
+        <?php if (!empty($error)): ?>
+            <div class="alert alert-danger">
+                <?php echo $error; ?>
+            </div>
+        <?php endif; ?>
+        
+        <div class="add-subject-form">
+            <h3>Add New Subject</h3>
+            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                <input type="hidden" name="action" value="add_subject">
+                <div class="form-group">
+                    <label for="subject_name">Subject Name:</label>
+                    <input type="text" class="form-control" id="subject_name" name="subject_name" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Subject</button>
+            </form>
+        </div>
+        
+        <?php if (empty($subjects)): ?>
+            <div class="empty-state">
+                <h3>No subjects yet</h3>
+                <p>Add your first subject to get started with your study planning.</p>
+            </div>
+        <?php else: ?>
+            <div class="subjects-list">
+                <?php foreach ($subjects as $subject): ?>
+                    <div class="subject-card">
+                        <div class="subject-info">
+                            <h3><?php echo htmlspecialchars($subject['subject_name']); ?></h3>
+                            <p>Weeks: <?php echo $subject['week_count']; ?></p>
+                            <p>Activities: <?php echo $subject['total_activities']; ?></p>
+                            <?php 
+                            $progress = $subject['total_activities'] > 0 ? 
+                                ($subject['completed_activities'] / $subject['total_activities']) * 100 : 0;
+                            ?>
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: <?php echo $progress; ?>%"></div>
+                            </div>
+                            <small><?php echo round($progress); ?>% complete</small>
+                        </div>
+                        <div class="subject-actions">
+                            <a href="weeks.php?subject_id=<?php echo $subject['id']; ?>" class="btn btn-primary btn-sm">Manage Weeks</a>
+                            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" onsubmit="return confirm('Are you sure you want to delete this subject?');">
+                                <input type="hidden" name="action" value="delete_subject">
+                                <input type="hidden" name="subject_id" value="<?php echo $subject['id']; ?>">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</body>
+</html>
+
+
+
+
+
+
+
+weeks.php:
+<?php
+// weeks.php
+require_once 'config.php';
+requireLogin();
+
+$conn = connectDB();
+$user_id = $_SESSION['user_id'];
+$message = '';
+$error = '';
+
+// Check if subject_id is provided
+if (!isset($_GET['subject_id'])) {
+    header("Location: subjects.php");
+    exit();
+}
+
+$subject_id = $_GET['subject_id'];
+
+// Verify the subject belongs to the user
+$stmt = $conn->prepare("SELECT * FROM subjects WHERE id = ? AND user_id = ?");
+$stmt->bind_param("ii", $subject_id, $user_id);
+$stmt->execute();
+$subject = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+if (!$subject) {
+    header("Location: subjects.php");
+    exit();
+}
+
+// Handle adding a new week
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'add_week') {
+    $start_date = $_POST['start_date'];
+    $end_date = $_POST['end_date'];
+    
+    // Validate dates
+    if (strtotime($start_date) > strtotime($end_date)) {
+        $error = "Start date cannot be after end date.";
+    } else {
+        $stmt = $conn->prepare("INSERT INTO study_weeks (subject_id, start_date, end_date) VALUES (?, ?, ?)");
+        $stmt->bind_param("iss", $subject_id, $start_date, $end_date);
+        
+        if ($stmt->execute()) {
+            $week_id = $conn->insert_id;
+            $message = "Week added successfully!";
+            
+            // Redirect to the activities page for this week
+            header("Location: activities.php?week_id=" . $week_id);
+            exit();
+        } else {
+            $error = "Error adding week: " . $conn->error;
+        }
+        $stmt->close();
+    }
+}
+
+// Handle deleting a week
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'delete_week') {
+    $week_id = $_POST['week_id'];
+    
+    $stmt = $conn->prepare("DELETE FROM study_weeks WHERE id = ? AND subject_id = ?");
+    $stmt->bind_param("ii", $week_id, $subject_id);
+    
+    if ($stmt->execute()) {
+        $message = "Week deleted successfully!";
+    } else {
+        $error = "Error deleting week: " . $conn->error;
+    }
+    $stmt->close();
+}
+
+// Get all weeks for the subject
+$stmt = $conn->prepare("
+    SELECT w.*, 
+           COUNT(a.id) as total_activities,
+           SUM(CASE WHEN a.is_completed = 1 THEN 1 ELSE 0 END) as completed_activities
+    FROM study_weeks w
+    LEFT JOIN study_activities a ON w.id = a.week_id
+    WHERE w.subject_id = ?
+    GROUP BY w.id
+    ORDER BY w.start_date ASC
+");
+$stmt->bind_param("i", $subject_id);
+$stmt->execute();
+$weeks = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Study Weeks - <?php echo htmlspecialchars($subject['subject_name']); ?></title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .week-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .week-info {
+            flex: 1;
+        }
+        
+        .week-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+        
+        .progress-container {
+            margin-top: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            height: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #007bff;
+        }
+        
+        .add-week-form {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .date-group {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .date-group .form-group {
+            flex: 1;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <?php include 'includes/navigation.php'; ?>
+        
+        <a href="subjects.php" class="back-link">← Back to Subjects</a>
+        
+        <h1>Study Weeks: <?php echo htmlspecialchars($subject['subject_name']); ?></h1>
+        
+        <?php if (!empty($message)): ?>
+            <div class="alert alert-success">
+                <?php echo $message; ?>
+            </div>
+        <?php endif; ?>
+        
+        <?php if (!empty($error)): ?>
+            <div class="alert alert-danger">
+                <?php echo $error; ?>
+            </div>
+        <?php endif; ?>
+        
+        <div class="add-week-form">
+            <h3>Add New Study Week</h3>
+            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"] . '?subject_id=' . $subject_id); ?>">
+                <input type="hidden" name="action" value="add_week">
+                <div class="date-group">
+                    <div class="form-group">
+                        <label for="start_date">Start Date:</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="end_date">End Date:</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Week & Set Activities</button>
+            </form>
+        </div>
+        
+        <?php if (empty($weeks)): ?>
+            <div class="empty-state">
+                <h3>No study weeks yet</h3>
+                <p>Add your first study week to start planning your activities.</p>
+            </div>
+        <?php else: ?>
+            <div class="weeks-list">
+                <?php foreach ($weeks as $week): ?>
+                    <div class="week-card">
+                        <div class="week-info">
+                            <h3>Week: <?php echo date('M d', strtotime($week['start_date'])); ?> - <?php echo date('M d, Y', strtotime($week['end_date'])); ?></h3>
+                            <p>Activities: <?php echo $week['total_activities']; ?></p>
+                            <?php 
+                            $progress = $week['total_activities'] > 0 ? 
+                                ($week['completed_activities'] / $week['total_activities']) * 100 : 0;
+                            ?>
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: <?php echo $progress; ?>%"></div>
+                            </div>
+                            <small><?php echo round($progress); ?>% complete</small>
+                        </div>
+                        <div class="week-actions">
+                            <a href="activities.php?week_id=<?php echo $week['id']; ?>" class="btn btn-primary btn-sm">Manage Activities</a>
+                            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"] . '?subject_id=' . $subject_id); ?>" onsubmit="return confirm('Are you sure you want to delete this week?');">
+                                <input type="hidden" name="action" value="delete_week">
+                                <input type="hidden" name="week_id" value="<?php echo $week['id']; ?>">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+activities.php:
+<?php
+// activities.php
+require_once 'config.php';
+requireLogin();
+
+$conn = connectDB();
+$user_id = $_SESSION['user_id'];
+$message = '';
+$error = '';
+
+// Check if week_id is provided
+if (!isset($_GET['week_id'])) {
+    header("Location: subjects.php");
+    exit();
+}
+
+$week_id = $_GET['week_id'];
+
+// Verify the week and subject belongs to the user
+$stmt = $conn->prepare("
+    SELECT w.*, s.subject_name, s.id as subject_id
+    FROM study_weeks w
+    JOIN subjects s ON w.subject_id = s.id
+    WHERE w.id = ? AND s.user_id = ?
+");
+$stmt->bind_param("ii", $week_id, $user_id);
+$stmt->execute();
+$week = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+if (!$week) {
+    header("Location: subjects.php");
+    exit();
+}
+
+// Handle adding a new activity
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'add_activity') {
+    $activity_type = $_POST['activity_type'];
+    $description = $_POST['description'];
+    
+    $stmt = $conn->prepare("INSERT INTO study_activities (week_id, activity_type, description) VALUES (?, ?, ?)");
+    $stmt->bind_param("iss", $week_id, $activity_type, $description);
+    
+    if ($stmt->execute()) {
+        $message = "Activity added successfully!";
+    } else {
+        $error = "Error adding activity: " . $conn->error;
+    }
+    $stmt->close();
+}
+
+// Handle marking an activity as complete
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'complete_activity') {
+    $activity_id = $_POST['activity_id'];
+    
+    $stmt = $conn->prepare("UPDATE study_activities SET is_completed = 1, completed_at = NOW() WHERE id = ? AND week_id = ?");
+    $stmt->bind_param("ii", $activity_id, $week_id);
+    
+    if ($stmt->execute()) {
+        // Check if this is a milestone achievement
+        checkAchievements($conn, $user_id);
+        
+        $message = "Activity marked as complete!";
+    } else {
+        $error = "Error updating activity: " . $conn->error;
+    }
+    $stmt->close();
+}
+
+// Handle deleting an activity
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'delete_activity') {
+    $activity_id = $_POST['activity_id'];
+    
+    $stmt = $conn->prepare("DELETE FROM study_activities WHERE id = ? AND week_id = ?");
+    $stmt->bind_param("ii", $activity_id, $week_id);
+    
+    if ($stmt->execute()) {
+        $message = "Activity deleted successfully!";
+    } else {
+        $error = "Error deleting activity: " . $conn->error;
+    }
+    $stmt->close();
+}
+
+// Get all activities for the week
+$stmt = $conn->prepare("
+    SELECT * FROM study_activities 
+    WHERE week_id = ?
+    ORDER BY activity_type, created_at
+");
+$stmt->bind_param("i", $week_id);
+$stmt->execute();
+$activities = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
+// Function to check and award achievements
+function checkAchievements($conn, $user_id) {
+    // Get completed activities count
+    $stmt = $conn->prepare("
+        SELECT COUNT(*) as completed_count 
+        FROM study_activities a
+        JOIN study_weeks w ON a.week_id = w.id
+        JOIN subjects s ON w.subject_id = s.id
+        WHERE s.user_id = ? AND a.is_completed = 1
+    ");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result()->fetch_assoc();
+    $completed_count = $result['completed_count'];
+    $stmt->close();
+    
+    // Award achievements based on milestones
+    $milestones = [
+        ['count' => 1, 'type' => 'First Step', 'description' => 'Completed your first study activity'],
+        ['count' => 5, 'type' => 'Getting Started', 'description' => 'Completed 5 study activities'],
+        ['count' => 10, 'type' => 'Gaining Momentum', 'description' => 'Completed 10 study activities'],
+        ['count' => 25, 'type' => 'Study Warrior', 'description' => 'Completed 25 study activities'],
+        ['count' => 50, 'type' => 'Study Master', 'description' => 'Completed 50 study activities'],
+        ['count' => 100, 'type' => 'Academic Excellence', 'description' => 'Completed 100 study activities']
+    ];
+    
+    foreach ($milestones as $milestone) {
+        if ($completed_count >= $milestone['count']) {
+            // Check if achievement already exists
+            $stmt = $conn->prepare("
+                SELECT id FROM achievements 
+                WHERE user_id = ? AND achievement_type = ?
+            ");
+            $stmt->bind_param("is", $user_id, $milestone['type']);
+            $stmt->execute();
+            $exists = $stmt->get_result()->num_rows > 0;
+            $stmt->close();
+            
+            // Add new achievement if it doesn't exist
+            if (!$exists) {
+                $stmt = $conn->prepare("
+                    INSERT INTO achievements (user_id, achievement_type, description) 
+                    VALUES (?, ?, ?)
+                ");
+                $stmt->bind_param("iss", $user_id, $milestone['type'], $milestone['description']);
+                $stmt->execute();
+                $stmt->close();
+                
+                // Add points to user
+                $points = $milestone['count'] * 10; // Simple point system
+                $stmt = $conn->prepare("
+                    UPDATE users SET points = points + ? WHERE id = ?
+                ");
+                $stmt->bind_param("ii", $points, $user_id);
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Week Activities - Study Planner</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .activities-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .activity-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .activity-item {
+            padding: 15px;
+            border-bottom: 1px solid #e
