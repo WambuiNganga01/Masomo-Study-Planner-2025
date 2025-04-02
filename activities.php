@@ -177,4 +177,238 @@ function checkAchievements($conn, $user_id) {
         
         .activity-item {
             padding: 15px;
-            border-bottom: 1px solid #e
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-info {
+            flex: 1;
+        }
+        
+        .activity-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .activity-completed {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+        
+        .badge-notes {
+            background-color: #17a2b8;
+            color: white;
+        }
+        
+        .badge-assignment {
+            background-color: #ffc107;
+            color: black;
+        }
+        
+        .add-activity-form {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .week-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+        
+        .empty-message {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <?php include 'includes/navigation.php'; ?>
+        
+        <a href="weeks.php?subject_id=<?php echo $week['subject_id']; ?>" class="back-link">← Back to Weeks</a>
+        
+        <h1>Activities for <?php echo htmlspecialchars($week['subject_name']); ?></h1>
+        
+        <div class="week-info">
+            <p><strong>Week Period:</strong> <?php echo date('M d, Y', strtotime($week['start_date'])); ?> - <?php echo date('M d, Y', strtotime($week['end_date'])); ?></p>
+        </div>
+        
+        <?php if (!empty($message)): ?>
+            <div class="alert alert-success">
+                <?php echo $message; ?>
+            </div>
+        <?php endif; ?>
+        
+        <?php if (!empty($error)): ?>
+            <div class="alert alert-danger">
+                <?php echo $error; ?>
+            </div>
+        <?php endif; ?>
+        
+        <div class="add-activity-form">
+            <h3>Add New Activity</h3>
+            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"] . '?week_id=' . $week_id); ?>">
+                <input type="hidden" name="action" value="add_activity">
+                <div class="form-group">
+                    <label for="activity_type">Activity Type:</label>
+                    <select class="form-control" id="activity_type" name="activity_type" required>
+                        <option value="notes">Notes to Read</option>
+                        <option value="assignment">Assignment</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Activity</button>
+            </form>
+        </div>
+        
+        <div class="activities-container">
+            <!-- Notes Section -->
+            <div class="activity-section">
+                <h3>Notes to Read</h3>
+                <?php 
+                $notes_count = 0;
+                foreach ($activities as $activity) {
+                    if ($activity['activity_type'] == 'notes') {
+                        $notes_count++;
+                ?>
+                <div class="activity-item <?php echo $activity['is_completed'] ? 'activity-completed' : ''; ?>">
+                    <div class="activity-info">
+                        <span class="badge badge-notes">Notes</span>
+                        <p><?php echo htmlspecialchars($activity['description']); ?></p>
+                        <?php if ($activity['is_completed']): ?>
+                            <small>Completed: <?php echo date('M d, Y', strtotime($activity['completed_at'])); ?></small>
+                        <?php endif; ?>
+                    </div>
+                    <div class="activity-actions">
+                        <?php if (!$activity['is_completed']): ?>
+                            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"] . '?week_id=' . $week_id); ?>">
+                                <input type="hidden" name="action" value="complete_activity">
+                                <input type="hidden" name="activity_id" value="<?php echo $activity['id']; ?>">
+                                <button type="submit" class="btn btn-success btn-sm">Mark Complete</button>
+                            </form>
+                        <?php endif; ?>
+                        <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"] . '?week_id=' . $week_id); ?>" onsubmit="return confirm('Are you sure you want to delete this activity?');">
+                            <input type="hidden" name="action" value="delete_activity">
+                            <input type="hidden" name="activity_id" value="<?php echo $activity['id']; ?>">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                <?php 
+                    }
+                }
+                if ($notes_count == 0): 
+                ?>
+                <div class="empty-message">
+                    <p>No notes to read added yet.</p>
+                </div>
+                <?php endif; ?>
+            </div>
+            
+            <!-- Assignments Section -->
+            <div class="activity-section">
+                <h3>Assignments</h3>
+                <?php 
+                $assignments_count = 0;
+                foreach ($activities as $activity) {
+                    if ($activity['activity_type'] == 'assignment') {
+                        $assignments_count++;
+                ?>
+                <div class="activity-item <?php echo $activity['is_completed'] ? 'activity-completed' : ''; ?>">
+                    <div class="activity-info">
+                        <span class="badge badge-assignment">Assignment</span>
+                        <p><?php echo htmlspecialchars($activity['description']); ?></p>
+                        <?php if ($activity['is_completed']): ?>
+                            <small>Completed: <?php echo date('M d, Y', strtotime($activity['completed_at'])); ?></small>
+                        <?php endif; ?>
+                    </div>
+                    <div class="activity-actions">
+                        <?php if (!$activity['is_completed']): ?>
+                            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"] . '?week_id=' . $week_id); ?>">
+                                <input type="hidden" name="action" value="complete_activity">
+                                <input type="hidden" name="activity_id" value="<?php echo $activity['id']; ?>">
+                                <button type="submit" class="btn btn-success btn-sm">Mark Complete</button>
+                            </form>
+                        <?php endif; ?>
+                        <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"] . '?week_id=' . $week_id); ?>" onsubmit="return confirm('Are you sure you want to delete this activity?');">
+                            <input type="hidden" name="action" value="delete_activity">
+                            <input type="hidden" name="activity_id" value="<?php echo $activity['id']; ?>">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                <?php 
+                    }
+                }
+                if ($assignments_count == 0): 
+                ?>
+                <div class="empty-message">
+                    <p>No assignments added yet.</p>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
