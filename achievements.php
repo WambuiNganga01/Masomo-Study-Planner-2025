@@ -188,7 +188,7 @@ if ($next_level) {
         .stat-value {
             font-size: 24px;
             font-weight: bold;
-            color: #007bff;
+            color: #459173;
         }
         
         .achievement-list {

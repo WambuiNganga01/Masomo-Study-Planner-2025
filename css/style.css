@@ -1,4 +1,11 @@
 /* dashboard.css */
+*{
+    color: #929a9a;
+    font-family: "Open Sans", sans-serif;
+}
+h1,h2,h3,h4,h5,h6 {
+    color: #333;
+}
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -39,7 +46,7 @@
 .stat-number {
     font-size: 24px;
     font-weight: bold;
-    color: #007bff;
+    color: #459173;
 }
 
 .upcoming-activities {
@@ -170,7 +177,7 @@
 }
 
 .form-control:focus {
-    border-color: #007bff;
+    border-color: #459173;
     outline: none;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
@@ -195,13 +202,13 @@
 
 .btn-primary {
     color: #fff;
-    background-color: #007bff;
-    border-color: #007bff;
+    background-color: #459173;
+    border-color: #459173;
 }
 
 .btn-primary:hover {
-    background-color: #0069d9;
-    border-color: #0062cc;
+    background-color: #3d8065;
+    border-color: #3d8065;
 }
 
 /* Form footer - for the links */
@@ -213,7 +220,7 @@
 }
 
 .form-footer a {
-    color: #007bff;
+    color: #459173;
     text-decoration: none;
 }
 

@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
     <style>
         /* Global Styles */
-        * {
+        * { font-family: "Open Sans", sans-serif;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -61,12 +61,12 @@
         }
         
         .nav-links a.cta {
-            background-color:#007bff;
+            background-color:#459173;
             color: white;
         }
         
         .nav-links a.cta:hover {
-            background-color: #0069d9;
+            background-color: #3d8065;
         }
         
         .logo {
@@ -113,7 +113,7 @@
         .btn {
             display: inline-block;
             padding: 12px 30px;
-            background-color:#007bff;
+            background-color: #459173;
             color: white;
             text-decoration: none;
             border-radius: 5px;
@@ -122,18 +122,18 @@
         }
         
         .btn:hover {
-            background-color: #0069d9;
+            background-color: #3d8065;
             transform: translateY(-2px);
         }
         
         .btn-outline {
             background-color: transparent;
-            border: 2px solid#007bff;
-            color:#007bff;
+            border: 2px solid #459173;
+            color:#459173;
         }
         
         .btn-outline:hover {
-            background-color:#007bff;
+            background-color: #459173;
             color: white;
         }
         
@@ -180,7 +180,7 @@
         
         .feature-icon {
             font-size: 2.5rem;
-            color:#007bff;
+            color:#459173;
             margin-bottom: 20px;
         }
         
@@ -259,9 +259,7 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-links">
-            <a href="index.php" class="logo">
-                Masomo Study Planner
-            </a>
+        <a href="dashboard.php" class="logo" style="color:#929a9a !important;"><Strong style="color:#459173 !important;">Masomo</Strong>Planner</a>
             <a href="login.php">Login</a>
             <a href="register.php" class="cta">Register</a>
         </div>

@@ -25,7 +25,7 @@ if (isset($_SESSION['user_id'])) {
 
 <nav class="main-nav">
     <div class="nav-brand">
-        <a href="dashboard.php">Masomo Study Planner</a>
+        <a href="dashboard.php" style="color:#929a9a !important;"><Strong style="color:#459173 !important;">Masomo</Strong>Planner</a>
     </div>
     
     <ul class="nav-links">
@@ -70,7 +70,7 @@ if (isset($_SESSION['user_id'])) {
 .nav-brand a {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #007bff;
+    color: #459173;
     text-decoration: none;
 }
 
@@ -93,17 +93,17 @@ if (isset($_SESSION['user_id'])) {
 }
 
 .nav-links li.active a {
-    background-color: #007bff;
+    background-color: #459173;
     color: white;
 }
 
 .nav-links li a:hover {
     background-color: #f8f9fa;
-    color: #007bff;
+    color: #459173;
 }
 
 .nav-links li.active a:hover {
-    background-color: #0056b3;
+    background-color:rgb(64, 132, 105);
     color: white;
 }
 
